@@ -33,19 +33,17 @@ public class Main {
     private String pass;
 
     @PostConstruct
-    public  void init() {
+    public void init() {
         auth = login + ":" + pass;
-        //System.out.println("login:"  + login);
+        encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    private static String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+    private static String encodedAuth;
     private static String refKey = "1f244518-29f3-11ee-ab53-f3d63edf6bf9";
 
 
     public static void main(String[] args) throws IOException {
         ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        System.out.println("Auth: " + auth);
 
         String json = request();
         System.out.println(jsonParse(json));
