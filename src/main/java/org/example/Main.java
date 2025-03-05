@@ -3,7 +3,13 @@ package org.example;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,21 +21,39 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+@PropertySource("classpath:application.properties")
+@Component
 public class Main {
 
     private static String auth = ""; // Логин и пароль
+
+    @Value("${jsonPars.login}")
+    private String login;
+    @Value("${jsonPars.pass}")
+    private String pass;
+
+    @PostConstruct
+    public  void init() {
+        auth = login + ":" + pass;
+        //System.out.println("login:"  + login);
+    }
+
+
     private static String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
     private static String refKey = "1f244518-29f3-11ee-ab53-f3d63edf6bf9";
 
 
     public static void main(String[] args) throws IOException {
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        System.out.println("Auth: " + auth);
+
         String json = request();
-        //System.out.println(jsonParse(json));
+        System.out.println(jsonParse(json));
         //System.out.println(jsonParse(json, refKey));
-        Data data = jsonParse(json, new Data());
+        //Data data = jsonParse(json, new Data());
         //System.out.println(data.toString());
-        List<Data> dataList = jsonParse(json, new ArrayList<>());
-        dataList.forEach(d -> System.out.println(d.toString()));
+        //List<Data> dataList = jsonParse(json, new ArrayList<>());
+        //dataList.forEach(d -> System.out.println(d.toString()));
 
     }
     //Десериализуем класс Data
@@ -102,6 +126,7 @@ public class Main {
         connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
 
         int responseCode = connection.getResponseCode();
+        System.out.println("Response Code: " + responseCode);
 
 
         if (responseCode == 200) {
@@ -115,4 +140,6 @@ public class Main {
         }
         return response.toString();
     }
+
+
 }
